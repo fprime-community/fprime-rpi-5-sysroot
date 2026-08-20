@@ -95,5 +95,14 @@ sync
 echo "Running PiShrink on ${OUTPUT}"
 "${PISHRINK}" -n -z "${OUTPUT}"
 
-echo "Done: ${OUTPUT}.gz — flash with Raspberry Pi Imager or 'zcat ... | dd'."
+# Return ownership of the produced image(s) to the invoking user
+if [ -n "${SUDO_USER:-}" ] && [ "${SUDO_USER}" != "root" ]; then
+    for f in "${OUTPUT}" "${OUTPUT}.gz"; do
+        if [ -e "${f}" ]; then
+            chown "${SUDO_USER}:$(id -gn "${SUDO_USER}")" "${f}"
+        fi
+    done
+fi
+
+echo "Done: ${OUTPUT}.gz — flash with Raspberry Pi Imager or ./flash-sd-card.sh."
 echo "The filesystem will expand to fill the card on first boot."
